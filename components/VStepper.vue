@@ -137,11 +137,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:currentStep'])
 
-// Track previous step to detect direction
 const previousStep = ref(props.currentStep)
 const isReversing = ref(false)
 
-// Watch for step changes to detect direction
 watch(
   () => props.currentStep,
   (newStep, oldStep) => {
