@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-white font-['Inter']">
     <div class="flex min-h-screen">
-      <div class="w-[35%] max-w-[350px] bg-gray-50 p-8 flex flex-col border-r border-gray-200">
+      <div class="w-[45%] max-w-[550px] bg-gray-50 p-8 flex flex-col border-r border-gray-200">
         <div class="flex items-center gap-2 mb-12">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +24,7 @@
             />
           </svg>
           <span class="text-2xl font-semibold text-gray-800">
-            Gomer <span class="font-normal text-gray-500">Mortgage</span>
+            Mortg<span class="font-normal text-gray-500">Edge</span>
           </span>
         </div>
         <VStepper
