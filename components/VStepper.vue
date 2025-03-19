@@ -5,7 +5,7 @@
       :key="index"
       class="relative"
     >
-      <div class="flex items-start mb-16 min-h-[100px] transition-all duration-500">
+      <div class="flex items-start mb-16 min-h-[100px] transition-all duration-500 ease-in-out">
         <div class="relative flex flex-col items-center">
           <div
             class="w-[44px] h-[44px] rounded-full flex items-center justify-center transform transition-all duration-300 ease-in-out"
@@ -55,10 +55,12 @@
               class="absolute inset-0 transition-all duration-500 ease-in-out"
               :class="{
                 'bg-[#4caf8a]': true,
-                'scale-y-100 origin-top': isCompleted(index + 1) && !isReversing,
+                'scale-y-100 origin-top': isCompleted(index + 1),
                 'scale-y-0 origin-top': !isCompleted(index + 1) && isReversing,
                 'scale-y-0 origin-bottom': !isCompleted(index + 1) && !isReversing,
-                'scale-y-100 origin-bottom': isCompleted(index + 1) && isReversing,
+              }"
+              :style="{
+                'transition-delay': getConnectorDelay(index + 1) + 'ms',
               }"
             />
             <div
@@ -71,7 +73,7 @@
         </div>
 
         <div
-          class="ml-5 flex flex-col pt-2 cursor-pointer transform transition-all duration-300 ease-in-out"
+          class="ml-5 flex flex-col pt-2 cursor-pointer transform transition-all duration-300 ease-in-out flex-1"
           :class="{
             'translate-x-0 opacity-100': isActive(index + 1),
             '-translate-x-1 opacity-90': !isActive(index + 1),
@@ -97,7 +99,7 @@
             {{ step.title }}
           </span>
 
-          <div class="h-[24px] overflow-hidden">
+          <div class="h-[24px] overflow-hidden relative">
             <transition
               @before-enter="beforeEnter"
               @enter="enter"
@@ -107,7 +109,7 @@
               <span
                 v-if="getStepStatus(index + 1)"
                 :data-index="index"
-                class="text-sm text-[#4caf8a] transition-all duration-300 ease-out block"
+                class="text-sm text-[#4caf8a] transition-all duration-300 ease-out absolute inset-0"
               >
                 {{ getStepStatus(index + 1) }}
               </span>
@@ -139,11 +141,13 @@ const emit = defineEmits(['update:currentStep'])
 
 const previousStep = ref(props.currentStep)
 const isReversing = ref(false)
+const stepDifference = ref(0)
 
 watch(
   () => props.currentStep,
   (newStep, oldStep) => {
     isReversing.value = newStep < oldStep
+    stepDifference.value = Math.abs(newStep - oldStep)
     previousStep.value = oldStep
   },
   { immediate: true },
@@ -163,6 +167,14 @@ const isCompleted = stepNumber => stepNumber < props.currentStep
 const isActive = stepNumber => stepNumber === props.currentStep
 const isFuture = stepNumber => stepNumber > props.currentStep
 
+const getConnectorDelay = stepNumber => {
+  if (isReversing.value) {
+    return (props.currentStep - stepNumber) * 100
+  } else {
+    return (stepNumber - previousStep.value) * 100
+  }
+}
+
 const getStepStatus = stepNumber => {
   if (isCompleted(stepNumber)) return 'Complete'
   if (isActive(stepNumber)) return 'In progress'
@@ -179,12 +191,16 @@ const beforeEnter = el => {
 }
 
 const enter = (el, done) => {
+  const stepIndex = parseInt(el.getAttribute('data-index'))
+  const baseDelay = 400
+  const sequentialDelay = stepIndex * 50
+
   setTimeout(() => {
     el.style.opacity = '1'
     el.style.transform = 'translateY(0)'
 
     setTimeout(done, 300)
-  }, 400)
+  }, baseDelay + sequentialDelay)
 }
 
 const beforeLeave = el => {
@@ -193,13 +209,16 @@ const beforeLeave = el => {
 }
 
 const leave = (el, done) => {
+  const stepIndex = parseInt(el.getAttribute('data-index'))
+  const sequentialDelay = isReversing.value ? stepIndex * 50 : 0
+
   if (isReversing.value) {
     setTimeout(() => {
       el.style.opacity = '0'
       el.style.transform = 'translateY(10px)'
 
       setTimeout(done, 300)
-    }, 200)
+    }, 200 + sequentialDelay)
   } else {
     el.style.opacity = '0'
     el.style.transform = 'translateY(10px)'
